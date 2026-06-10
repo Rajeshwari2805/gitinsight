@@ -4,7 +4,7 @@
 
 ![GitInsight Demo](https://raw.githubusercontent.com/YOUR_USERNAME/gitinsight/main/demo.gif)
 
-**[🔗 Live Demo →](https://YOUR_USERNAME.github.io/gitinsight)**
+**[🔗 Live Demo →]( https://rajeshwari2805.github.io/gitinsight/)**
 
 ---
 
@@ -132,7 +132,7 @@ Claude responds with **3 sections**: Strengths · Gaps to Fix · Recommended Nex
 ## 👩‍💻 Author
 
 Built by **Rajeshwari Gajendran**  
-[GitHub](https://github.com/Rajeshwari2805) · [LinkedIn](https://linkedin.com/in/YOUR_LINKEDIN)
+[GitHub](https://github.com/Rajeshwari2805) · [LinkedIn](https://linkedin.com/in/rajeshwari-g-2802r)
 
 ---
 
