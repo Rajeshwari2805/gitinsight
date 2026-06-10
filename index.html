@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitInsight — GitHub Portfolio Analyzer</title>
+  <meta name="description" content="Analyze any GitHub profile: developer score, language breakdown, contribution heatmap, and AI-powered career insights." />
+  <meta property="og:title" content="GitInsight — GitHub Portfolio Analyzer" />
+  <meta property="og:description" content="Get a developer score, language breakdown, and AI insights for any GitHub profile." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Noise overlay -->
+  <div class="noise"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">⚡</div>
+        <span class="logo-text">GitInsight</span>
+        <span class="logo-sep">/</span>
+        <span class="logo-sub">GitHub Portfolio Analyzer</span>
+      </div>
+      <div class="header-badge">Powered by Claude AI</div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Hero (shown before search) -->
+    <section class="hero" id="hero">
+      <div class="hero-tag">GitHub API + Claude AI + html2canvas</div>
+      <h1 class="hero-title">Analyze any GitHub<br><span class="hero-gradient">profile in seconds</span></h1>
+      <p class="hero-sub">Developer score · Language heatmap · AI career insights · Shareable profile card</p>
+    </section>
+
+    <!-- Search -->
+    <div class="search-wrap" id="searchWrap">
+      <div class="search-box">
+        <span class="search-at">@</span>
+        <input
+          type="text"
+          id="usernameInput"
+          class="search-input"
+          placeholder="github-username"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+      <button class="search-btn" id="analyzeBtn" onclick="analyze()">
+        <span id="btnText">Analyze →</span>
+      </button>
+    </div>
+
+    <div class="error-box" id="errorBox" style="display:none"></div>
+
+    <!-- Results (hidden until data loads) -->
+    <div class="results" id="results" style="display:none">
+
+      <!-- Profile card (used for download too) -->
+      <div class="profile-header fade-in" id="profileHeader" style="--d:0s">
+        <div class="profile-left">
+          <img id="avatar" src="" alt="avatar" class="avatar" />
+          <div class="profile-info">
+            <div class="profile-name" id="profileName"></div>
+            <div class="profile-login" id="profileLogin"></div>
+            <div class="profile-bio" id="profileBio"></div>
+            <div class="profile-meta" id="profileMeta"></div>
+          </div>
+        </div>
+        <div class="score-wrap">
+          <svg class="score-ring" id="scoreRing" viewBox="0 0 120 120" width="120" height="120">
+            <circle class="ring-bg" cx="60" cy="60" r="52" />
+            <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52" />
+          </svg>
+          <div class="score-label-wrap">
+            <span class="score-num" id="scoreNum">0</span>
+            <span class="score-sub">/ 100</span>
+          </div>
+          <div class="score-caption">Dev Score</div>
+        </div>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stat-grid fade-in" id="statGrid" style="--d:0.1s"></div>
+
+      <!-- Tabs -->
+      <div class="tab-bar fade-in" style="--d:0.15s">
+        <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+        <button class="tab-btn" onclick="switchTab('repos')">Repositories</button>
+        <button class="tab-btn" onclick="switchTab('heatmap')">Heatmap</button>
+        <button class="tab-btn" onclick="switchTab('ai')">✨ AI Insights</button>
+      </div>
+
+      <!-- Overview Tab -->
+      <div class="tab-panel active" id="tab-overview">
+        <div class="card fade-in" style="--d:0.2s">
+          <div class="card-title">Language Distribution</div>
+          <div class="lang-bar-wrap" id="langBarWrap"></div>
+          <div class="lang-legend" id="langLegend"></div>
+        </div>
+        <div class="card fade-in" style="--d:0.25s">
+          <div class="card-title">Top Repositories</div>
+          <div class="repo-grid" id="topRepoGrid"></div>
+        </div>
+      </div>
+
+      <!-- Repos Tab -->
+      <div class="tab-panel" id="tab-repos">
+        <div class="repo-grid" id="allRepoGrid"></div>
+      </div>
+
+      <!-- Heatmap Tab -->
+      <div class="tab-panel" id="tab-heatmap">
+        <div class="card fade-in" style="--d:0.2s">
+          <div class="card-title">Contribution Activity <span class="card-note">(last 53 weeks)</span></div>
+          <div class="heatmap-container" id="heatmapContainer">
+            <div class="heatmap-loading" id="heatmapLoading">Loading contribution data…</div>
+            <div id="heatmapGrid" style="display:none"></div>
+          </div>
+          <div class="heatmap-legend">
+            <span style="color:#475569;font-size:11px;font-family:'JetBrains Mono',monospace">Less</span>
+            <span class="hl-cell" style="background:#0d1117"></span>
+            <span class="hl-cell" style="background:#0e4429"></span>
+            <span class="hl-cell" style="background:#006d32"></span>
+            <span class="hl-cell" style="background:#26a641"></span>
+            <span class="hl-cell" style="background:#39d353"></span>
+            <span style="color:#475569;font-size:11px;font-family:'JetBrains Mono',monospace">More</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Tab -->
+      <div class="tab-panel" id="tab-ai">
+        <div class="card ai-card fade-in" style="--d:0.2s">
+          <div class="ai-header">
+            <div class="ai-icon">✨</div>
+            <div class="ai-title">AI Career Insights</div>
+            <div class="ai-badge">Claude Sonnet</div>
+          </div>
+          <div class="ai-body" id="aiBody">
+            <div class="ai-loading" id="aiLoading">Claude is analyzing the profile…</div>
+            <div class="ai-text" id="aiText" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Download button -->
+      <div class="download-wrap fade-in" style="--d:0.3s">
+        <button class="download-btn" onclick="downloadCard()">
+          ⬇ Download Profile Card
+        </button>
+      </div>
+
+    </div><!-- /results -->
+
+    <!-- Hidden card used for PNG export -->
+    <div id="exportCard" class="export-card" style="display:none">
+      <div class="ec-bg">
+        <div class="ec-noise"></div>
+        <div class="ec-header">
+          <img id="ecAvatar" src="" class="ec-avatar" crossorigin="anonymous" />
+          <div class="ec-info">
+            <div class="ec-name" id="ecName"></div>
+            <div class="ec-login" id="ecLogin"></div>
+            <div class="ec-bio" id="ecBio"></div>
+          </div>
+          <div class="ec-score">
+            <div class="ec-score-num" id="ecScore"></div>
+            <div class="ec-score-label">Dev Score</div>
+          </div>
+        </div>
+        <div class="ec-stats" id="ecStats"></div>
+        <div class="ec-langs" id="ecLangs"></div>
+        <div class="ec-footer">
+          <span>⚡ GitInsight</span>
+          <span id="ecUrl"></span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
